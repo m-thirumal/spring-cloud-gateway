@@ -1,0 +1,64 @@
+spring:
+  profiles:
+    active: DEV
+  main: 
+     lazy-initialization: true
+     allow-bean-definition-overriding: true
+  session:
+     store-type: jdbc
+     
+  freemarker: 
+    check-template-location: false
+    
+server:
+  port: 9095
+  # ssl:
+   # key-store: classpath:demo_indsolv.keystore
+   # key-store-password: thirumal
+  compression:
+    enabled: true
+ 
+---
+feign:
+    hystrix:
+        enabled: true
+---
+
+logging: 
+ level: 
+  in.thirumal: debug
+  org.springframework: debug
+
+--- 
+eureka:
+  instance:
+    instanceId: ${spring.cloud.client.hostname}:${spring.application.name}:${random.int[1,999999]}
+    appname: spring-cloud-gateway
+    leaseRenewalIntervalInSeconds: 10
+    preferIpAddress: true
+  client:
+    enabled: true
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://thirumal:thirumal@localhost:8761/eureka/
+      
+spring:
+  boot: 
+    admin:
+      client:
+        instance:
+          service-base-url: http://localhost:7126
+        url: ${spring.boot.admin.client.instance.service-base-url}
+        connect-timeout: 5000
+  zipkin: 
+    base-url: http://localhost:9411/  
+ 
+springdoc:
+  version: '@springdoc.version@'
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+   
