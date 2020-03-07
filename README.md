@@ -8,3 +8,6 @@
 # To Create jar
 mvn clean package -DskipTests=true
 
+# Run as jar from terminal
+java -jar target/spring-cloud-gateway-0.0.1-SNAPSHOT.jar
+
