@@ -53,7 +53,7 @@ public class Router {
 									.build();
 							return chain.filter(exchange.mutate().request(request).build());
 						})).uri(lb))*/
-				.route("client2", r -> r.path("/client2/**")
+				.route("client2", r -> r.path("/**")
 					.filters(f -> 
 						f.requestRateLimiter()
 								.rateLimiter(RedisRateLimiter.class, c -> c.setBurstCapacity(10).setReplenishRate(4))
