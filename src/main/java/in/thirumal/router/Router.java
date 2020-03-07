@@ -38,6 +38,7 @@ public class Router {
 	public RouteLocator routeLocator(RouteLocatorBuilder routeLocatorBuilder) {
 		logger.debug(this.getClass().getSimpleName() + ": " + Thread.currentThread().getStackTrace()[1].getMethodName());
 		final String lb;
+		final String defaultLb ="lb://go-to-hell";
 		if (Set.of("DEV").contains(activeProfile)) {
 			lb = "http://localhost:8082";
 		} else {
@@ -52,7 +53,7 @@ public class Router {
 									.build();
 							return chain.filter(exchange.mutate().request(request).build());
 						})).uri(lb))*/
-				.route("client2", r -> r.path("/**")
+				.route("client2", r -> r.path("/client2/**")
 					.filters(f -> 
 						f.requestRateLimiter()
 								.rateLimiter(RedisRateLimiter.class, c -> c.setBurstCapacity(10).setReplenishRate(4))
@@ -70,12 +71,12 @@ public class Router {
 						.uri(lb))
 				.route("default", r -> r.path("/**").filters(f -> f//.rewritePath("/*", "/default-icms")
 						.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway")))
-						.uri(lb))
+						.uri(defaultLb))
 				.build();
 				
 	}
 	
-	@RequestMapping("default-gateway")
+	@RequestMapping("/default-gateway")
 	public String defaultGateway() {
 		return "Message from default gateway";
 	}
