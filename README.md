@@ -6,10 +6,10 @@
 3. https://github.com/M-Thirumal/eureka-client-1
 
 # To Create jar
-mvn clean package -DskipTests=true
+ `mvn clean package -DskipTests=true`
 
 # Run as jar from terminal
-java -jar target/spring-cloud-gateway-0.0.1-SNAPSHOT.jar
+`java -jar target/spring-cloud-gateway-0.0.1-SNAPSHOT.jar`
 
 # Gateway Architecture
 ![Gateway Architecture(architecture.png)
