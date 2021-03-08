@@ -63,7 +63,7 @@ public class Router {
 								.secureHeaders()
 								.addResponseHeader("app", "client1")
 								//.addResponseHeader("response-time", LocalDateTime.now().toString())
-								.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
+							//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
 						) // add response header
 
 						// .route(r -> r.header("X-Request-Id", "\\d+")
@@ -79,13 +79,13 @@ public class Router {
 									.secureHeaders()
 									.addResponseHeader("app", "client2")
 									//.addResponseHeader("response-time", LocalDateTime.now().toString())
-									.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
+								//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
 							) // add response header
 
 							// .route(r -> r.header("X-Request-Id", "\\d+")
 							.uri(client_2_lb))
-				.route("default", r -> r.path("/**").filters(f -> f//.rewritePath("/*", "/default-icms")
-						.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/fallback/default-gateway")))
+				.route("default", r -> r.path("/**")//.filters(f -> f//.rewritePath("/*", "/default-icms")
+						//.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/fallback/default-gateway")))
 						.uri(defaultLb))
 				.build();
 				
