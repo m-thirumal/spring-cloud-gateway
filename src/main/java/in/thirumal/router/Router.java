@@ -65,6 +65,7 @@ public class Router {
 								.rewritePath("1/", "") //Rewrite the path
 								//.addResponseHeader("response-time", LocalDateTime.now().toString())
 							//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
+								.retry(3)//retry
 								.circuitBreaker(c -> c.setName("myCircuitBreaker").setFallbackUri("forward:/fallback/1"))
 						) // add response header
 						
