@@ -9,16 +9,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * 
- * @author thirumal
+ * @author Thirumal
  *
  */
 @ControllerAdvice
 public class ServiceNotFoundHandler {
-    @ExceptionHandler(NotFoundException.class)
+   
+	@ExceptionHandler(NotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public String handleUnavailableService(NotFoundException e) {
-    	System.out.println("ji");
+    	//System.out.println("ji");
         return "service unavailable";
     }
+    
 }

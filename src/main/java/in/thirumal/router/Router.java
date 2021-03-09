@@ -65,6 +65,7 @@ public class Router {
 								.rewritePath("1/", "") //Rewrite the path
 								//.addResponseHeader("response-time", LocalDateTime.now().toString())
 							//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
+								.circuitBreaker(c -> c.setName("myCircuitBreaker").setFallbackUri("forward:/fallback/1"))
 						) // add response header
 						
 						// .route(r -> r.header("X-Request-Id", "\\d+")
@@ -82,12 +83,14 @@ public class Router {
 									.rewritePath("2/", "") //Rewrite the path
 									//.addResponseHeader("response-time", LocalDateTime.now().toString())
 								//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
+									.circuitBreaker(c -> c.setName("myCircuitBreaker").setFallbackUri("forward:/fallback/2"))
 							) // add response header
 						
 							// .route(r -> r.header("X-Request-Id", "\\d+")
 							.uri(client_2_lb))
 				.route("default", r -> r.path("/**")//.filters(f -> f//.rewritePath("/*", "/default-icms")
 						//.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/fallback/default-gateway")))
+						.filters(f -> f.circuitBreaker(c -> c.setName("myCircuitBreaker").setFallbackUri("forward:/fallback/default")))
 						.uri(defaultLb))
 				.build();
 				
