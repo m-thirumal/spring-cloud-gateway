@@ -35,7 +35,7 @@ public class Router {
 	@Bean
 	public RouteLocator routeLocator(RouteLocatorBuilder routeLocatorBuilder) {
 		logger.debug(this.getClass().getSimpleName() + ": " + Thread.currentThread().getStackTrace()[1].getMethodName());
-		final String client_1_lb = "lb://eureka-client-1";
+		final String client_1_lb = "lb://EUREKA-CLIENT-1";
 		final String client_2_lb = "lb://eureka-client-2";
 		final String defaultLb ="lb://go-to-hell";
 //		if (Set.of("DEV").contains(activeProfile)) {
@@ -62,10 +62,11 @@ public class Router {
 										.setKeyResolver(remoteAddressKeyResolver)).retry(3)
 								.secureHeaders()
 								.addResponseHeader("app", "client1")
+								.rewritePath("1/", "") //Rewrite the path
 								//.addResponseHeader("response-time", LocalDateTime.now().toString())
 							//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
 						) // add response header
-
+						
 						// .route(r -> r.header("X-Request-Id", "\\d+")
 						.uri(client_1_lb))
 				.route("client_2", r -> r.path("/2/**")
@@ -78,10 +79,11 @@ public class Router {
 											.setKeyResolver(remoteAddressKeyResolver)).retry(3)
 									.secureHeaders()
 									.addResponseHeader("app", "client2")
+									.rewritePath("2/", "") //Rewrite the path
 									//.addResponseHeader("response-time", LocalDateTime.now().toString())
 								//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
 							) // add response header
-
+						
 							// .route(r -> r.header("X-Request-Id", "\\d+")
 							.uri(client_2_lb))
 				.route("default", r -> r.path("/**")//.filters(f -> f//.rewritePath("/*", "/default-icms")
