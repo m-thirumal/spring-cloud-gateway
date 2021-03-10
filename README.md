@@ -1,6 +1,6 @@
 # spring-cloud-gateway
 
-![SCG](scg.png)
+![SCG](img/scg.png)
 
 # Run the following projects to get the proper result
 
@@ -19,11 +19,13 @@
 
 # Gateway Architecture
 
-![Gateway Architecture](architecture.png)
+![Gateway Architecture](img/architecture.png)
 
 # Rate Limiter (Service Denial)
 
 Redis is used for rate limiter, which is used for protecting application from API throttling (Service Denial)
+
+![Rate Limiter](img/rate_limiter.png)
 
 # Circuit Breaker
 
@@ -33,4 +35,4 @@ Circuit Breaker has three states `Closed State, Open State, Half Open State`. Th
   
   2. While in `Open states` no calls will be going to failing remote service until certain wait time, then it goes to `Half-Open state`, in this stage reduced amount of calls goes to remote service to make sure the calls are successful, `IF` the calls are responding as `expected` it will go to `Closed state` or it goes back to `Open state` avoiding calls to failing remote service.
 
-![Circuit-Breaker](Circuit-Breaker.png)
+![Circuit-Breaker](img/Circuit-Breaker.png)
