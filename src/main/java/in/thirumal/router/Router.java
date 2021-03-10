@@ -3,6 +3,9 @@
  */
 package in.thirumal.router;
 
+import static org.springframework.cloud.gateway.support.RouteMetadataUtils.CONNECT_TIMEOUT_ATTR;
+import static org.springframework.cloud.gateway.support.RouteMetadataUtils.RESPONSE_TIMEOUT_ATTR;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +29,6 @@ public class Router {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private static final String GATEWAY_NAME = "GatewayCircuitBreaker";
-	private static final String RESPONSE_TIMEOUT_ATTR = "response-timeout";
-	private static final String CONNECT_TIMEOUT_ATTR = "connect-timeout";
 	
 	@Value("${spring.profiles.active}")
 	private String activeProfile;
