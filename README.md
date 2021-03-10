@@ -20,3 +20,7 @@
 # Gateway Architecture
 
 ![Gateway Architecture](architecture.png)
+
+# Circuit Breaker
+
+![Circuit-Breaker](Circuit-Breaker.png)

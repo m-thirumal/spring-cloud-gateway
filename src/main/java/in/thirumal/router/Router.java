@@ -25,8 +25,15 @@ public class Router {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	private static final String GATEWAY_NAME = "GatewayCircuitBreaker";
+	private static final String RESPONSE_TIMEOUT_ATTR = "response-timeout";
+	private static final String CONNECT_TIMEOUT_ATTR = "connect-timeout";
+	
 	@Value("${spring.profiles.active}")
 	private String activeProfile;
+	@Value("${server.port}")
+	int port;
+	
 	@Autowired
 	RemoteAddressKeyResolver remoteAddressKeyResolver;
 	@Autowired
@@ -34,10 +41,11 @@ public class Router {
 
 	@Bean
 	public RouteLocator routeLocator(RouteLocatorBuilder routeLocatorBuilder) {
-		logger.debug(this.getClass().getSimpleName() + ": " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		logger.debug("{} : {}", this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
 		final String client_1_lb = "lb://EUREKA-CLIENT-1";
 		final String client_2_lb = "lb://eureka-client-2";
-		final String defaultLb ="lb://go-to-hell";
+		//final String defaultLb ="lb://go-to-hell";
+		final String gatewayUrl = "http://localhost:" + port;
 //		if (Set.of("DEV").contains(activeProfile)) {
 //			lb = "lb://eureka-client-1";
 //		} else {
@@ -66,7 +74,10 @@ public class Router {
 								//.addResponseHeader("response-time", LocalDateTime.now().toString())
 							//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
 								.retry(3)//retry
-								.circuitBreaker(c -> c.setName("myCircuitBreaker").setFallbackUri("forward:/fallback/1"))
+								
+								.circuitBreaker(c -> c.setName(GATEWAY_NAME).setFallbackUri("forward:/fallback/1"))
+								.metadata(RESPONSE_TIMEOUT_ATTR, 600000)
+								.metadata(CONNECT_TIMEOUT_ATTR, 60000)
 						) // add response header
 						
 						// .route(r -> r.header("X-Request-Id", "\\d+")
@@ -84,15 +95,20 @@ public class Router {
 									.rewritePath("2/", "") //Rewrite the path
 									//.addResponseHeader("response-time", LocalDateTime.now().toString())
 								//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
-									.circuitBreaker(c -> c.setName("myCircuitBreaker").setFallbackUri("forward:/fallback/2"))
+									.circuitBreaker(c -> c.setName(GATEWAY_NAME).setFallbackUri("forward:/fallback/2"))
+									.metadata(RESPONSE_TIMEOUT_ATTR, 600000)
+									.metadata(CONNECT_TIMEOUT_ATTR, 60000)
 							) // add response header
 						
 							// .route(r -> r.header("X-Request-Id", "\\d+")
 							.uri(client_2_lb))
 				.route("default", r -> r.path("/**")//.filters(f -> f//.rewritePath("/*", "/default-icms")
 						//.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/fallback/default-gateway")))
-						.filters(f -> f.circuitBreaker(c -> c.setName("myCircuitBreaker").setFallbackUri("forward:/fallback/default")))
-						.uri(defaultLb))
+						
+						.filters(f -> f
+						.rewritePath("/(?<segment>.*)", "/fallback/default")
+						.circuitBreaker(c -> c.setName("myCircuitBreaker").setFallbackUri("forward:/fallback/default")))
+						.uri(gatewayUrl))
 				.build();
 				
 	}
