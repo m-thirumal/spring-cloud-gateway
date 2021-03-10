@@ -21,6 +21,10 @@
 
 ![Gateway Architecture](architecture.png)
 
+# Rate Limiter (Service Denial)
+
+Redis is used for rate limiter, which is used for protecting application from API throttling (Service Denial)
+
 # Circuit Breaker
 
 Circuit Breaker has three states `Closed State, Open State, Half Open State`. The image below shows how the flow from one state to another changes.
