@@ -4,6 +4,7 @@
 package in.thirumal.throttle;
 
 import java.math.BigInteger;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
+import org.springframework.cloud.gateway.support.ipresolver.XForwardedRemoteAddressResolver;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -33,18 +35,21 @@ public class RemoteAddressKeyResolver implements KeyResolver {
 	public Mono<String> resolve(ServerWebExchange exchange) {
 		//findPattern(exchange);
 		//checkTime(exchange);
-		return Mono.just(exchange.getRequest().getRemoteAddress().getAddress().getHostAddress());
+		//return Mono.just(exchange.getRequest().getRemoteAddress().getAddress().getHostAddress());
+		XForwardedRemoteAddressResolver resolver = XForwardedRemoteAddressResolver.maxTrustedIndex(1);
+        InetSocketAddress inetSocketAddress = resolver.resolve(exchange);
+        return Mono.just(inetSocketAddress.getAddress().getHostAddress());
 	}
 
 	@SuppressWarnings("unused")
 	private void checkTime(ServerWebExchange exchange) {
-		logger.debug(this.getClass().getSimpleName() + ": " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		logger.debug(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
 		try {
 			//exchange
 			String time = exchange.getRequest().getHeaders().get("Request-Time").get(0);
 			System.out.println(generateKey(time));
 		} catch (NullPointerException e) {
-			logger.error("Null Pointer exception " + e);
+			logger.error("Null Pointer exception {} ", e.getCause());
 		}
 	}
 	
