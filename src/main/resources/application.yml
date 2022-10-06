@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: spring-cloud-gateway
   profiles:
     active: DEV
   main: 
@@ -6,10 +8,17 @@ spring:
      allow-bean-definition-overriding: true
   session:
      store-type: jdbc
-     
+  zipkin: 
+    base-url: http://localhost:9411/  
   freemarker: 
     check-template-location: false
-    
+  redis:
+    host: localhost
+    port: 6379
+  cloud:
+    gateway:
+      filter:
+        secure-headers.frame-options: SAMEORIGIN
 server:
   port: 9095
   # ssl:
@@ -17,23 +26,28 @@ server:
    # key-store-password: thirumal
   compression:
     enabled: true
- 
----
-feign:
-    hystrix:
-        enabled: true
----
+  error:
+    whitelabel:
+      enabled: false
+  shutdown: graceful
 
-spring:
-  redis:
-    host: localhost
-    port: 6379
----
+#Actuator
+management:
+  endpoint:
+    restart: 
+      enabled: true
 
 logging: 
- level: 
-  in.thirumal: debug
-  org.springframework: debug
+  file:
+    path: logs/
+    name: logs/spring-cloud-gateway.log
+  level:
+    '[in.thirumal]': debug
+  logback: 
+    rollingpolicy: 
+      max-history: 10
+      max-file-size: 100MB
+      total-size-cap: 1GB
 
 --- 
 eureka:
@@ -48,23 +62,4 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://thirumal:thirumal@localhost:8761/eureka/
-      
-spring:
-  boot: 
-    admin:
-      client:
-        instance:
-          service-base-url: http://localhost:7126
-        url: ${spring.boot.admin.client.instance.service-base-url}
-        connect-timeout: 5000
-  zipkin: 
-    base-url: http://localhost:9411/  
- 
-springdoc:
-  version: '@springdoc.version@'
-  api-docs:
-    enabled: true
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-   
+  
