@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JCircuitBreakerFactory;
+import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JConfigBuilder;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -19,6 +21,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import in.thirumal.throttle.AuthorizationKeyResolver;
 import in.thirumal.throttle.RemoteAddressKeyResolver;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.timelimiter.TimeLimiterConfig;
+import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 
 /**
  * @author Thirumal
@@ -119,4 +125,30 @@ public class Router {
 		return "Message from default gateway";
 	}
 	
+	
+	/** 
+	 * Mandatory for time out
+	 * @param circuitBreakerRegistry
+	 * @param timeLimiterRegistry
+	 * @return
+	 */
+	@Bean
+	public ReactiveResilience4JCircuitBreakerFactory reactiveResilience4JCircuitBreakerFactory(
+			final CircuitBreakerRegistry circuitBreakerRegistry, final TimeLimiterRegistry timeLimiterRegistry) {
+		ReactiveResilience4JCircuitBreakerFactory reactiveResilience4JCircuitBreakerFactory = new 
+				ReactiveResilience4JCircuitBreakerFactory(circuitBreakerRegistry, timeLimiterRegistry);
+		reactiveResilience4JCircuitBreakerFactory.configureDefault(id -> {
+			CircuitBreakerConfig circuitBreakerConfig = circuitBreakerRegistry.find(id).isPresent()
+					? circuitBreakerRegistry.find(id).get().getCircuitBreakerConfig()
+					: circuitBreakerRegistry.getDefaultConfig();
+			TimeLimiterConfig timeLimiterConfig = timeLimiterRegistry.find(id).isPresent()
+					? timeLimiterRegistry.find(id).get().getTimeLimiterConfig()
+					: timeLimiterRegistry.getDefaultConfig();
+
+			return new Resilience4JConfigBuilder(id).circuitBreakerConfig(circuitBreakerConfig)
+					.timeLimiterConfig(timeLimiterConfig).build();
+		});
+		return reactiveResilience4JCircuitBreakerFactory;
+	}
+
 }
