@@ -36,3 +36,11 @@ Circuit Breaker has three states `Closed State, Open State, Half Open State`. Th
   2. While in `Open states` no calls will be going to failing remote service until certain wait time, then it goes to `Half-Open state`, in this stage reduced amount of calls goes to remote service to make sure the calls are successful, `IF` the calls are responding as `expected` it will go to `Closed state` or it goes back to `Open state` avoiding calls to failing remote service.
 
 ![Circuit-Breaker](img/Circuit-Breaker.png)
+
+= TLS/SSL
+
+Generate `.p12` file with the following commands
+
+```
+openssl pkcs12 -export -in fullchain.pem -inkey privkey.pem -out keystore.p12 -name gateway -CAfile chain.pem -caname root
+```
