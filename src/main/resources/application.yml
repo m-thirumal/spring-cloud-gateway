@@ -21,9 +21,12 @@ spring:
         secure-headers.frame-options: SAMEORIGIN
 server:
   port: 9095
-  # ssl:
-   # key-store: classpath:demo_indsolv.keystore
-   # key-store-password: thirumal
+ #  ssl: 
+ #   enabled: true
+ #   key-store: classpath:keystore.p12
+ #   key-store-password: thirumal
+ #   key-store-type: PKCS12
+ #   key-alias: gateway
   compression:
     enabled: true
   error:
