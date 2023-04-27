@@ -21,6 +21,12 @@
 
 ![Gateway Architecture](img/architecture.png)
 
+# Features:
+
+* Rate Limiter
+* Circuit Breaker
+* Google Re-Captcha for all microservices
+
 # Rate Limiter (Service Denial)
 
 Redis is used for rate limiter, which is used for protecting application from API throttling (Service Denial)
@@ -37,7 +43,12 @@ Circuit Breaker has three states `Closed State, Open State, Half Open State`. Th
 
 ![Circuit-Breaker](img/Circuit-Breaker.png)
 
-= TLS/SSL
+# Google Recaptcha
+
+Google Recaptcha can be verified at gateway instead of verifying it in each microservices. Avoid code duplication
+
+
+# TLS/SSL
 
 Generate `.p12` file with the following commands
 
