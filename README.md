@@ -4,10 +4,10 @@
 
 # Features:
 
-* [Rate Limiter](#-Rate-Limiter)
-* [Circuit Breaker](#-Circuit-Breaker)
-* [Google Re-Captcha for all microservices](#-Google-Recaptcha)
-* [TLS/SSL](#-TLS/SSL)
+* [Rate Limiter](#Rate-Limiter)
+* [Circuit Breaker](#Circuit-Breaker)
+* [Google Re-Captcha for all microservices](#Google-Recaptcha)
+* [TLS/SSL](#TLSSSL)
 
 # Run the following projects to get the proper result
 
