@@ -26,6 +26,7 @@
 * Rate Limiter
 * Circuit Breaker
 * Google Re-Captcha for all microservices
+* TLS/SSL
 
 # Rate Limiter (Service Denial)
 
