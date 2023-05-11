@@ -18,7 +18,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class EncryptDecryptHelper {
 	
-	private static final String SECRET_KEY = "Thisisatestkeyfortesting";
+	private static final String SECRET_KEY = "Thirumal";
 
 	private static SecretKeySpec secretKey;
 	private static byte[] key;
@@ -76,12 +76,12 @@ public class EncryptDecryptHelper {
 
 	public static void main(String[] args) {
 
-		String key = "Thisisatestkeyfortesting";
+		String key = "Thirumal";
 
 		//language=JSON
 		String data = "{\n"
-				+ "  \"title\": \"TestTitle1\",\n"
-				+ "  \"author\": \"Thirumal\"\n"
+				+ "    \"userName\": \"thirumal@enkindletech.com\",\n"
+				+ "    \"password\": \"Mars241991!\"\n"
 				+ "}";
 
 		System.out.println("Original String: " + data);
