@@ -2,12 +2,18 @@
 
 ![SCG](img/scg.png)
 
+# Features:
+
+* [Rate Limiter](#Rate-Limiter-{Service-Denial})
+* [Circuit Breaker](#Circuit-Breaker)
+* Google Re-Captcha for all microservices
+* TLS/SSL
+
 # Run the following projects to get the proper result
 
 1. https://github.com/M-Thirumal/eureka-server
 2. https://github.com/M-Thirumal/eureka-client-2
 3. https://github.com/M-Thirumal/eureka-client-1
-
 4. Redis
 
 # To Create jar
@@ -21,14 +27,8 @@
 
 ![Gateway Architecture](img/architecture.png)
 
-# Features:
 
-* Rate Limiter
-* Circuit Breaker
-* Google Re-Captcha for all microservices
-* TLS/SSL
-
-# Rate Limiter (Service Denial)
+# Rate Limiter {Service Denial}
 
 Redis is used for rate limiter, which is used for protecting application from API throttling (Service Denial)
 
