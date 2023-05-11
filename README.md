@@ -50,8 +50,25 @@ Google Recaptcha can be verified at gateway instead of verifying it in each micr
 
 # TLS/SSL
 
-Generate `.p12` file with the following commands
+To Enable SSL, add the following properties in the `yml` file and add the certificate in `.p12` format
 
 ```
-openssl pkcs12 -export -in fullchain.pem -inkey privkey.pem -out keystore.p12 -name gateway -CAfile chain.pem -caname root
+server:
+  port: 9095
+  ssl: 
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: thirumal
+    key-store-type: PKCS12
+    key-alias: gateway
+  compression:
+    enabled: true
+```
+
+Get free SSL certificate from [Let's Encrypt](https://github.com/m-thirumal/installation_guide/blob/master/docs/TLS/let's_encrypt.md)
+
+To Generate the `.p12` from `.pem` use the following commands
+
+```
+openssl pkcs12 -export -in fullchain1.pem -inkey privkey1.pem -out keystore.p12 -name gateway -CAfile chain1.pem -caname root
 ```
