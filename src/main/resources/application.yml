@@ -63,4 +63,9 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://thirumal:thirumal@3.6.239.198:8761/eureka/
-  
+google:
+  recaptcha:
+    key:
+      site: REPLACE_IT_WITH_SITE_ID
+      secret: REPLACE_IT_WITH_KEY
+      threshold: 0.5
