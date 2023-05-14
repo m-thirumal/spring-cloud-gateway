@@ -31,6 +31,13 @@
 
 ![Gateway Architecture](img/architecture.png)
 
+## Encryption & Decryption
+
+Encryption of request body and response body is implemented in global filter and in route 2.
+
+```
+f.filter(encryptDecryptFilter.apply(new EncryptDecryptFilter.Config()))
+```
 
 ## Rate Limiter 
 
