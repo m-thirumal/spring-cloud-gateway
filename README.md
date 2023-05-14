@@ -1,42 +1,48 @@
 # spring-cloud-gateway
 
-![SCG](img/scg.png)
+![Gateway](./img/Gateway.drawio.png)
 
-# Features:
 
-* [Rate Limiter](#Rate-Limiter)
-* [Circuit Breaker](#Circuit-Breaker)
-* [Google Re-Captcha for all microservices](#Google-Recaptcha)
-* [TLS/SSL](#TLSSSL)
+## Features:
 
-# Run the following projects to get the proper result
+* Rate Limiter
+* Circuit Breaker
+* Encryption and Decryption of request and response body  
+* Google Re-Captcha validation at gateway for all microservices
+* TLS/SSL
 
-1. https://github.com/M-Thirumal/eureka-server
-2. https://github.com/M-Thirumal/eureka-client-2
-3. https://github.com/M-Thirumal/eureka-client-1
-4. Redis
 
-# To Create jar
+## Prerequisite - To Run the following projects to get the proper result
+
+1. [Eureka Server](https://github.com/M-Thirumal/eureka-server)
+2. [Eureka Client 1 / MicroServices 1](https://github.com/M-Thirumal/eureka-client-2)
+3. [Eureka Client 2 / MicroServices 2](https://github.com/M-Thirumal/eureka-client-1)
+4. [Redis](https://m-thirumal.github.io/installation_guide/#/redis/install)
+
+## To Create jar
 
  `mvn clean package -DskipTests=true`
 
-# Run as jar from terminal
+## Run as jar from terminal
+
 `java -jar target/spring-cloud-gateway-0.0.1-SNAPSHOT.jar`
 
-# Gateway Architecture
+## Routing and Load balancer
 
 ![Gateway Architecture](img/architecture.png)
 
 
-# Rate Limiter 
+## Rate Limiter 
 
  i.e Service Denial
+
+![SCG](img/scg.png)
 
 Redis is used for rate limiter, which is used for protecting application from API throttling (Service Denial)
 
 ![Rate Limiter](img/rate_limiter.png)
 
-# Circuit Breaker
+## Circuit Breaker
 
 Circuit Breaker has three states `Closed State, Open State, Half Open State`. The image below shows how the flow from one state to another changes.
 
@@ -46,12 +52,12 @@ Circuit Breaker has three states `Closed State, Open State, Half Open State`. Th
 
 ![Circuit-Breaker](img/Circuit-Breaker.png)
 
-# Google Recaptcha
+## Google Recaptcha
 
 Google Recaptcha can be verified at gateway instead of verifying it in each microservices. Avoid code duplication
 
 
-# TLS/SSL
+## TLS/SSL
 
 To Enable SSL, add the following properties in the `yml` file and add the certificate in `.p12` format
 
