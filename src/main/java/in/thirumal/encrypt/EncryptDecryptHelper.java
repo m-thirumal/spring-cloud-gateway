@@ -45,7 +45,6 @@ public class EncryptDecryptHelper {
 		}
 	}
 
-
 	public static String encrypt(String strToEncrypt, String secret) {
 		try	{
 			setKey(secret);

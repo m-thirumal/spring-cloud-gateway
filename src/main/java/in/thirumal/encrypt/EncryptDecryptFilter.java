@@ -1,4 +1,4 @@
-package in.thirumal.config;
+package in.thirumal.encrypt;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -8,8 +8,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import in.thirumal.config.EncryptDecryptFilter.Config;
-import in.thirumal.encrypt.EncryptDecryptHelper;
+import in.thirumal.encrypt.EncryptDecryptFilter.Config;
 
 import org.bouncycastle.util.Strings;
 import org.reactivestreams.Publisher;
@@ -44,6 +43,11 @@ import org.springframework.web.server.ServerWebExchange;
 
 import static java.util.function.Function.identity;
 
+/**
+ * 
+ * @author Thirumal
+ *
+ */
 @Component
 public class EncryptDecryptFilter extends AbstractGatewayFilterFactory<Config> {
 
@@ -51,10 +55,8 @@ public class EncryptDecryptFilter extends AbstractGatewayFilterFactory<Config> {
 
 	private final Map<String, MessageBodyEncoder> messageBodyEncoders;
 
-
-
 	public EncryptDecryptFilter(Set<MessageBodyDecoder> messageBodyDecoders,
-			Set<MessageBodyEncoder> messageBodyEncoders){
+			Set<MessageBodyEncoder> messageBodyEncoders) {
 		super(Config.class);
 		this.messageBodyDecoders = messageBodyDecoders.stream()
 				.collect(Collectors.toMap(MessageBodyDecoder::encodingType, identity()));
@@ -65,22 +67,22 @@ public class EncryptDecryptFilter extends AbstractGatewayFilterFactory<Config> {
 	@Override
 	public GatewayFilter apply(Config config) {
 
-		return new OrderedGatewayFilter( (exchange, chain) -> {
+		return new OrderedGatewayFilter((exchange, chain) -> {
 
-				System.out.println("Applying encrypt-decrypt filter");
+			System.out.println("Applying encrypt-decrypt filter");
 
-				return DataBufferUtils.join(exchange.getRequest().getBody()).flatMap(dataBuffer -> {
+			return DataBufferUtils.join(exchange.getRequest().getBody()).flatMap(dataBuffer -> {
 
-					ServerHttpRequest mutatedHttpRequest = getServerHttpRequest(exchange, dataBuffer);
+				ServerHttpRequest mutatedHttpRequest = getServerHttpRequest(exchange, dataBuffer);
 
-					ServerHttpResponse mutatedHttpResponse = getServerHttpResponse(exchange);
+				ServerHttpResponse mutatedHttpResponse = getServerHttpResponse(exchange);
 
-					return chain.filter(exchange.mutate().request(mutatedHttpRequest).response(mutatedHttpResponse).build());
+				return chain
+						.filter(exchange.mutate().request(mutatedHttpRequest).response(mutatedHttpResponse).build());
 
-				});
+			});
 
 		}, -2);
-
 
 	}
 
@@ -96,7 +98,7 @@ public class EncryptDecryptFilter extends AbstractGatewayFilterFactory<Config> {
 		return new ServerHttpRequestDecorator(exchange.getRequest()) {
 
 			@Override
-			public HttpHeaders getHeaders(){
+			public HttpHeaders getHeaders() {
 				HttpHeaders httpHeaders = new HttpHeaders();
 				httpHeaders.putAll(exchange.getRequest().getHeaders());
 				if (decryptedBodyBytes.length > 0) {
@@ -106,19 +108,13 @@ public class EncryptDecryptFilter extends AbstractGatewayFilterFactory<Config> {
 				return httpHeaders;
 			}
 
-
 			@Override
 			public Flux<DataBuffer> getBody() {
-				System.out.println("hi");
-				return Flux.just(body).
-						map(s -> {
-							return new DefaultDataBufferFactory().wrap(decryptedBodyBytes);
-						});
+				return Flux.just(body).map(s -> new DefaultDataBufferFactory().wrap(decryptedBodyBytes));
 
 			}
 
 		};
-
 
 	}
 
@@ -136,28 +132,27 @@ public class EncryptDecryptFilter extends AbstractGatewayFilterFactory<Config> {
 
 				ClientResponse clientResponse = prepareClientResponse(body, httpHeaders);
 
-				Mono<String> modifiedBody = extractBody(exchange, clientResponse)
-						.flatMap( originalBody -> Mono.just(Objects.requireNonNull(EncryptDecryptHelper.encrypt(originalBody))))
+				Mono<String> modifiedBody = extractBody(exchange, clientResponse).flatMap(
+						originalBody -> Mono.just(Objects.requireNonNull(EncryptDecryptHelper.encrypt(originalBody))))
 						.switchIfEmpty(Mono.empty());
 
-				BodyInserter<Mono<String>, ReactiveHttpOutputMessage> bodyInserter = BodyInserters.fromPublisher(modifiedBody, String.class);
+				BodyInserter<Mono<String>, ReactiveHttpOutputMessage> bodyInserter = BodyInserters
+						.fromPublisher(modifiedBody, String.class);
 
 				CachedBodyOutputMessage outputMessage = new CachedBodyOutputMessage(exchange,
 						exchange.getResponse().getHeaders());
 
-				return bodyInserter.insert(outputMessage, new BodyInserterContext())
-						.then(Mono.defer(() -> {
-							Mono<DataBuffer> messageBody = updateBody(getDelegate(), outputMessage);
-							HttpHeaders headers = getDelegate().getHeaders();
-							headers.setContentType(MediaType.TEXT_PLAIN);
-							if (headers.containsKey(HttpHeaders.CONTENT_LENGTH)) {
-								messageBody = messageBody.doOnNext(data -> {
-									headers.setContentLength(data.readableByteCount());
-								});
-							}
+				return bodyInserter.insert(outputMessage, new BodyInserterContext()).then(Mono.defer(() -> {
+					Mono<DataBuffer> messageBody = updateBody(getDelegate(), outputMessage);
+					HttpHeaders headers = getDelegate().getHeaders();
+					headers.setContentType(MediaType.TEXT_PLAIN);
+					if (headers.containsKey(HttpHeaders.CONTENT_LENGTH)) {
+						messageBody = messageBody.doOnNext(data -> 
+							headers.setContentLength(data.readableByteCount()));
+					}
 
-							return getDelegate().writeWith(messageBody);
-						}));
+					return getDelegate().writeWith(messageBody);
+				}));
 
 			}
 
@@ -168,34 +163,29 @@ public class EncryptDecryptFilter extends AbstractGatewayFilterFactory<Config> {
 				for (String encoding : encodingHeaders) {
 					MessageBodyDecoder decoder = messageBodyDecoders.get(encoding);
 					if (decoder != null) {
-						return clientResponse.bodyToMono(byte[].class)
-								.publishOn(Schedulers.parallel()).map(decoder::decode)
-								.map(bytes -> exchange.getResponse().bufferFactory()
-										.wrap(bytes))
+						return clientResponse.bodyToMono(byte[].class).publishOn(Schedulers.parallel())
+								.map(decoder::decode).map(bytes -> exchange.getResponse().bufferFactory().wrap(bytes))
 								.map(buffer -> prepareClientResponse(Mono.just(buffer),
 										exchange.getResponse().getHeaders()))
 								.flatMap(response -> response.bodyToMono(String.class));
 					}
 				}
 
-
 				return clientResponse.bodyToMono(String.class);
 
 			}
 
-			private Mono<DataBuffer> updateBody(ServerHttpResponse httpResponse,
-					CachedBodyOutputMessage message) {
+			private Mono<DataBuffer> updateBody(ServerHttpResponse httpResponse, CachedBodyOutputMessage message) {
 
 				Mono<DataBuffer> response = DataBufferUtils.join(message.getBody());
 
-				List<String> encodingHeaders = httpResponse.getHeaders()
-						.getOrEmpty(HttpHeaders.CONTENT_ENCODING);
+				List<String> encodingHeaders = httpResponse.getHeaders().getOrEmpty(HttpHeaders.CONTENT_ENCODING);
 				for (String encoding : encodingHeaders) {
 					MessageBodyEncoder encoder = messageBodyEncoders.get(encoding);
 					if (encoder != null) {
 						DataBufferFactory dataBufferFactory = httpResponse.bufferFactory();
-						response = response.publishOn(Schedulers.parallel())
-								.map(encoder::encode).map(dataBufferFactory::wrap);
+						response = response.publishOn(Schedulers.parallel()).map(encoder::encode)
+								.map(dataBufferFactory::wrap);
 						break;
 					}
 				}
@@ -204,16 +194,15 @@ public class EncryptDecryptFilter extends AbstractGatewayFilterFactory<Config> {
 
 			}
 
-
-
-			private ClientResponse prepareClientResponse(Publisher<? extends DataBuffer> body, HttpHeaders httpHeaders) {
-				ClientResponse.Builder builder = ClientResponse.create(exchange.getResponse().getStatusCode(), HandlerStrategies.withDefaults().messageReaders());
+			private ClientResponse prepareClientResponse(Publisher<? extends DataBuffer> body,
+					HttpHeaders httpHeaders) {
+				ClientResponse.Builder builder = ClientResponse.create(exchange.getResponse().getStatusCode(),
+						HandlerStrategies.withDefaults().messageReaders());
 				return builder.headers(headers -> headers.putAll(httpHeaders)).body(Flux.from(body)).build();
 			}
 
 		};
 	}
-
 
 	private static String toRaw(Flux<DataBuffer> body) {
 		AtomicReference<String> rawRef = new AtomicReference<>();

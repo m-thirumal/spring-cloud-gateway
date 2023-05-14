@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import in.thirumal.encrypt.EncryptDecryptFilter;
 import in.thirumal.throttle.AuthorizationKeyResolver;
 import in.thirumal.throttle.RemoteAddressKeyResolver;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -47,7 +48,7 @@ public class Router {
 	AuthorizationKeyResolver authorizationKeyResolver;
 
 	@Bean
-	public RouteLocator routeLocator(RouteLocatorBuilder routeLocatorBuilder) {
+	public RouteLocator routeLocator(RouteLocatorBuilder routeLocatorBuilder, EncryptDecryptFilter encryptDecryptFilter) {
 		logger.debug("{} : {}", this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
 		final String client_1_lb = "lb://EUREKA-CLIENT-1";
 		final String client_2_lb = "lb://eureka-client-2";
@@ -89,17 +90,20 @@ public class Router {
 						
 						// .route(r -> r.header("X-Request-Id", "\\d+")
 						.uri(client_1_lb))
-				.route("client_2", r -> r.path("/2/**")
+				.route("client_2", r -> r.path("/evoting-api/**")
 						.filters(f -> 
-							f.requestRateLimiter()
+							//Encrypt and decrypt request and response body
+							f.filter(encryptDecryptFilter.apply(new EncryptDecryptFilter.Config())).
+							requestRateLimiter()
 									.rateLimiter(RedisRateLimiter.class, c -> c.setBurstCapacity(10).setReplenishRate(4))
 									// .configure(c -> c.setKeyResolver(exchange ->
 									// Mono.just(HttpHeaders.AUTHORIZATION)))
 									.configure(c -> c.setKeyResolver(authorizationKeyResolver)
 											.setKeyResolver(remoteAddressKeyResolver)).retry(3)
 									.secureHeaders()
+									
 									.addResponseHeader("app", "client2")
-									.rewritePath("2/", "") //Rewrite the path
+									.rewritePath("evoting-api/", "") //Rewrite the path
 									//.addResponseHeader("response-time", LocalDateTime.now().toString())
 								//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
 									.circuitBreaker(c -> c.setName(GATEWAY_NAME).setFallbackUri("forward:/fallback/2"))

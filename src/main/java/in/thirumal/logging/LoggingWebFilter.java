@@ -1,7 +1,7 @@
 /**
  * 
  */
-package in.thirumal.config;
+package in.thirumal.logging;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.channels.Channels;
@@ -59,7 +59,7 @@ public class LoggingWebFilter implements WebFilter {
                         byte[] content = new byte[joinedBuffers.readableByteCount()];
                         joinedBuffers.read(content);
                         String responseBody = new String(content, StandardCharsets.UTF_8);//MODIFY RESPONSE and Return the Modified response
-                        logger.info("Response decorate ==> RequestId: {}, method: {}, url: {}, response body :{}", request.getId(), request.getMethodValue(), request.getURI(), responseBody);
+                        logger.info("Response decorate ==> RequestId: {}, method: {}, url: {}, response body :{}", request.getId(), request.getMethod(), request.getURI(), responseBody);
                         return dataBufferFactory.wrap(responseBody.getBytes());
                     })
                     .switchIfEmpty(Flux.defer(() -> {
@@ -82,7 +82,7 @@ public class LoggingWebFilter implements WebFilter {
         return new ServerHttpRequestDecorator(request) {
             @Override
             public Flux<DataBuffer> getBody() {
-            	logger.info("requestId: {}, method: {} , url: {}", request.getId(), request.getMethodValue(), request.getURI());
+            	logger.info("requestId: {}, method: {} , url: {}", request.getId(), request.getMethod(), request.getURI());
                 return super.getBody().publishOn(Schedulers.boundedElastic()).doOnNext(dataBuffer -> {
                     try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                         Channels.newChannel(baos).write(dataBuffer.asByteBuffer().asReadOnlyBuffer());
