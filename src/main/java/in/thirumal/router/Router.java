@@ -51,7 +51,7 @@ public class Router {
 	public RouteLocator routeLocator(RouteLocatorBuilder routeLocatorBuilder, EncryptDecryptFilter encryptDecryptFilter) {
 		logger.debug("{} : {}", this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
 		final String client_1_lb = "lb://EUREKA-CLIENT-1";
-		final String client_2_lb = "lb://eureka-client-2";
+		final String client_2_lb = "lb://EUREKA-CLIENT-2";
 		//final String defaultLb ="lb://go-to-hell";
 		final String gatewayUrl = "http://localhost:" + port;
 //		if (Set.of("DEV").contains(activeProfile)) {
@@ -103,7 +103,7 @@ public class Router {
 									.secureHeaders()
 									
 									.addResponseHeader("app", "client2")
-									.rewritePath("evoting-api/", "") //Rewrite the path
+									.rewritePath("2/", "") //Rewrite the path
 									//.addResponseHeader("response-time", LocalDateTime.now().toString())
 								//	.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/default-gateway"))
 									.circuitBreaker(c -> c.setName(GATEWAY_NAME).setFallbackUri("forward:/fallback/2"))
