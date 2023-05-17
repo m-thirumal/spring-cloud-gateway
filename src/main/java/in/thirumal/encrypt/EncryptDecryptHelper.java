@@ -93,4 +93,27 @@ public class EncryptDecryptHelper {
         Pattern r = Pattern.compile(pattern);
         return r.matcher(data).find();
     }
+	
+	public static void main(String[] args) {
+
+		String key = "Thirumal";
+
+		//language=JSON
+		String data = "{\n"
+				+ "    \"userName\": \"thirumal@enkindletech.com\",\n"
+				+ "    \"password\": \"Mars241991!\"\n"
+				+ "}";
+
+		System.out.println("Original String: " + data);
+
+		String encryptedString = EncryptDecryptHelper.encrypt(data, key);
+
+		System.out.println("Encrypted String: " + encryptedString);
+
+		String decryptedString = EncryptDecryptHelper.decrypt(encryptedString, key);
+
+		System.out.println("Decrypted String: " + decryptedString);
+
+	}
+	
 }
