@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import in.thirumal.encrypt.EncryptDecryptFilter;
+import in.thirumal.cryptography.EncryptDecryptFilter;
 import in.thirumal.throttle.AuthorizationKeyResolver;
 import in.thirumal.throttle.RemoteAddressKeyResolver;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;

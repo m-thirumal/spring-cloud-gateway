@@ -62,7 +62,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://thirumal:thirumal@3.6.239.198:8761/eureka/
+      defaultZone: http://thirumal:thirumal@localhost:8761/eureka/
 google:
   recaptcha:
     key:

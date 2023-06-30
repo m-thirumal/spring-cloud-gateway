@@ -1,7 +1,7 @@
 /**
  * 
  */
-package in.thirumal.encrypt;
+package in.thirumal.cryptography;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
