@@ -6,6 +6,7 @@ package in.thirumal.encrypt;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.regex.Pattern;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +26,7 @@ public class EncryptDecryptHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(EncryptDecryptHelper.class);
 	
-	private static final String SECRET_KEY = "Thirumal";
+	private static final String SECRET_KEY = "0123456789abcdef";
 
 	private static SecretKeySpec secretKey;
 	private static byte[] key;
@@ -34,10 +36,12 @@ public class EncryptDecryptHelper {
 	}
 
 	public static String encrypt(String strToEncrypt){
+		Security.addProvider(new BouncyCastleProvider());
 		return encrypt(strToEncrypt, SECRET_KEY);
 	}
 
 	public static String decrypt(String strToDecrypt){
+		Security.addProvider(new BouncyCastleProvider());
 		return decrypt(strToDecrypt, SECRET_KEY);
 	}
 	
@@ -46,9 +50,11 @@ public class EncryptDecryptHelper {
 			return strToDecrypt;
 		}
 		try {
-			setKey(secret);
-			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-			cipher.init(Cipher.DECRYPT_MODE, secretKey);
+			//setKey(secret);
+			byte[] keyBytes = secret.getBytes();
+			SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS7PADDING", "BC");
+			cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
 			return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
 		}
 		catch (Exception e) {
@@ -59,9 +65,11 @@ public class EncryptDecryptHelper {
 
 	public static String encrypt(String strToEncrypt, String secret) {
 		try	{
-			setKey(secret);
-			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+			//setKey(secret);
+			 byte[] keyBytes = secret.getBytes();
+			SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS7Padding", "BC");
+			cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
 			return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
 		}
 		catch (Exception e)	{
@@ -95,14 +103,11 @@ public class EncryptDecryptHelper {
     }
 	
 	public static void main(String[] args) {
-
-		String key = "Thirumal";
+		Security.addProvider(new BouncyCastleProvider());
+		String key = "0123456789abcdef";
 
 		//language=JSON
-		String data = "{\n"
-				+ "    \"userName\": \"thirumal@enkindletech.com\",\n"
-				+ "    \"password\": \"Mars241991!\"\n"
-				+ "}";
+		String data = "{\"userName\":\"racetortoise@gmail.com\",\"password\":\"Race@1234\"}";
 
 		System.out.println("Original String: " + data);
 
@@ -110,7 +115,7 @@ public class EncryptDecryptHelper {
 
 		System.out.println("Encrypted String: " + encryptedString);
 
-		String decryptedString = EncryptDecryptHelper.decrypt(encryptedString, key);
+		String decryptedString = EncryptDecryptHelper.decrypt("mKxmdnEtCqBDAPHHR/XVLA==", key);
 
 		System.out.println("Decrypted String: " + decryptedString);
 
