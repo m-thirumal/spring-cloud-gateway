@@ -89,8 +89,12 @@ public class EncryptDecryptFilter extends AbstractGatewayFilterFactory<Config> {
 	private ServerHttpRequest getServerHttpRequest(ServerWebExchange exchange, DataBuffer dataBuffer) {
 
 		DataBufferUtils.retain(dataBuffer);
-		Flux<DataBuffer> cachedFlux = Flux.defer(() -> Flux.just(dataBuffer.slice(0, dataBuffer.readableByteCount())));
-
+	//	Flux<DataBuffer> cachedFlux = Flux.defer(() -> Flux.just(dataBuffer.slice(0, dataBuffer.readableByteCount())));
+		Flux<DataBuffer> cachedFlux = Flux.defer(() -> {
+		    int readableBytes = dataBuffer.readableByteCount();
+		    DataBuffer slicedBuffer = dataBuffer.split(readableBytes);  // Get the content up to the current readable bytes
+		    return Flux.just(slicedBuffer);
+		});
 		String body = toRaw(cachedFlux);
 		String decryptedBody = EncryptDecryptHelper.decrypt(body);
 		byte[] decryptedBodyBytes = decryptedBody.getBytes(StandardCharsets.UTF_8);
