@@ -26,6 +26,11 @@ public class GatewayFallback {
 		return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Client 2 - Service Not available"));
 	}
 	
+    @GetMapping("/3")
+    public Mono<ResponseEntity<String>> googleFallback() {
+        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Google - Service Not available"));
+    }  
+	
 	@GetMapping("/default")
 	public Mono<ResponseEntity<String>> defaultFallback() {
 		return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Not able to find the route!"));

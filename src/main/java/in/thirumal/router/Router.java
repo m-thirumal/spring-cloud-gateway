@@ -6,20 +6,20 @@ package in.thirumal.router;
 import static org.springframework.cloud.gateway.support.RouteMetadataUtils.CONNECT_TIMEOUT_ATTR;
 import static org.springframework.cloud.gateway.support.RouteMetadataUtils.RESPONSE_TIMEOUT_ATTR;
 
+import java.time.LocalDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JCircuitBreakerFactory;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JConfigBuilder;
-import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import in.thirumal.cryptography.EncryptDecryptFilter;
 import in.thirumal.throttle.AuthorizationKeyResolver;
 import in.thirumal.throttle.RemoteAddressKeyResolver;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -48,7 +48,7 @@ public class Router {
 	AuthorizationKeyResolver authorizationKeyResolver;
 
 	@Bean
-	public RouteLocator routeLocator(RouteLocatorBuilder routeLocatorBuilder, EncryptDecryptFilter encryptDecryptFilter) {
+	RouteLocator routeLocator(RouteLocatorBuilder routeLocatorBuilder) {
 		logger.debug("{} : {}", this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
 		final String client_1_lb = "lb://EUREKA-CLIENT-1";
 		final String client_2_lb = "lb://EUREKA-CLIENT-2";
@@ -70,12 +70,12 @@ public class Router {
 						})).uri(lb))*/
 				.route("client_1", r -> r.path("/1/**")
 					.filters(f -> 
-						f.requestRateLimiter()
-								.rateLimiter(RedisRateLimiter.class, c -> c.setBurstCapacity(10).setReplenishRate(4))
+						f//.requestRateLimiter()
+							//	.rateLimiter(RedisRateLimiter.class, c -> c.setBurstCapacity(10).setReplenishRate(4))
 								// .configure(c -> c.setKeyResolver(exchange ->
 								// Mono.just(HttpHeaders.AUTHORIZATION)))
-								.configure(c -> c.setKeyResolver(authorizationKeyResolver)
-										.setKeyResolver(remoteAddressKeyResolver)).retry(3)
+							//	.configure(c -> c.setKeyResolver(authorizationKeyResolver)
+								//		.setKeyResolver(remoteAddressKeyResolver)).retry(3)
 								.secureHeaders()
 								.addResponseHeader("app", "client1")
 								.rewritePath("1/", "") //Rewrite the path
@@ -90,17 +90,17 @@ public class Router {
 						
 						// .route(r -> r.header("X-Request-Id", "\\d+")
 						.uri(client_1_lb))
-				.route("client_2", r -> r.path("/evoting-api/**")
+				.route("client_2", r -> r.path("/2/**")
 						.filters(f -> 
 							//Encrypt and decrypt request and response body
-							f.filter(encryptDecryptFilter.apply(new EncryptDecryptFilter.Config())).
-							requestRateLimiter()
-									.rateLimiter(RedisRateLimiter.class, c -> c.setBurstCapacity(10).setReplenishRate(4))
+						//	f.filter(encryptDecryptFilter.apply(new EncryptDecryptFilter.Config())).
+							//requestRateLimiter()
+								//	.rateLimiter(RedisRateLimiter.class, c -> c.setBurstCapacity(10).setReplenishRate(4))
 									// .configure(c -> c.setKeyResolver(exchange ->
 									// Mono.just(HttpHeaders.AUTHORIZATION)))
-									.configure(c -> c.setKeyResolver(authorizationKeyResolver)
-											.setKeyResolver(remoteAddressKeyResolver)).retry(3)
-									.secureHeaders()
+									//.configure(c -> c.setKeyResolver(authorizationKeyResolver)
+										//	.setKeyResolver(remoteAddressKeyResolver)).retry(3)
+									f.secureHeaders()
 									
 									.addResponseHeader("app", "client2")
 									.rewritePath("2/", "") //Rewrite the path
@@ -113,6 +113,20 @@ public class Router {
 						
 							// .route(r -> r.header("X-Request-Id", "\\d+")
 							.uri(client_2_lb))
+			    .route("client_google", r -> r.path("/google/**")
+//			            .and()
+//			            .query("q", ".*")
+                        .filters(f -> 
+                                    f.secureHeaders()
+                                    .addResponseHeader("app", "google")
+                                    .preserveHostHeader()
+                                    .rewritePath("/google/(?<segment>.*)", "/search?q=${segment}") //Rewrite the path
+                                    .addResponseHeader("response-time", LocalDateTime.now().toString())
+                                   .circuitBreaker(c -> c.setName(GATEWAY_NAME).setFallbackUri("forward:/fallback/3"))
+                                    .metadata(RESPONSE_TIMEOUT_ATTR, 600000)
+                                    .metadata(CONNECT_TIMEOUT_ATTR, 60000)
+                            ) // add response header
+                            .uri("https://www.google.com"))
 				.route("default", r -> r.path("/**")//.filters(f -> f//.rewritePath("/*", "/default-icms")
 						//.hystrix(h -> h.setName("gateway Fallback").setFallbackUri("forward:/fallback/default-gateway")))
 						
@@ -137,7 +151,7 @@ public class Router {
 	 * @return
 	 */
 	@Bean
-	public ReactiveResilience4JCircuitBreakerFactory reactiveResilience4JCircuitBreakerFactory(
+	ReactiveResilience4JCircuitBreakerFactory reactiveResilience4JCircuitBreakerFactory(
 			final CircuitBreakerRegistry circuitBreakerRegistry, final TimeLimiterRegistry timeLimiterRegistry) {
 		ReactiveResilience4JCircuitBreakerFactory reactiveResilience4JCircuitBreakerFactory = new 
 				ReactiveResilience4JCircuitBreakerFactory(circuitBreakerRegistry, timeLimiterRegistry);

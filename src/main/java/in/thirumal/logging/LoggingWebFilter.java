@@ -31,7 +31,7 @@ import reactor.core.scheduler.Schedulers;
  * @author Thirumal
  *
  */
-@Component
+//@Component
 public class LoggingWebFilter implements WebFilter {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
