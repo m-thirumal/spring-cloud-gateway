@@ -7,6 +7,7 @@
 
 * Rate Limiter
 * Circuit Breaker
+* [Whitelisting IP address](#White-list-IP)
 * Encryption and Decryption of request and response body  
 * Google Re-Captcha validation at gateway for all microservices
 * TLS/SSL
@@ -88,3 +89,8 @@ To Generate the `.p12` from `.pem` use the following commands
 ```
 openssl pkcs12 -export -in fullchain1.pem -inkey privkey1.pem -out keystore.p12 -name gateway -CAfile chain1.pem -caname root
 ```
+
+## White list IP
+
+!> `127.0.0.1` (localhost) is whitelisted in this. To disable `Whitelist` option, just comment `@component` in the class `/spring-cloud-gateway/src/main/java/in/thirumal/filter/IpWhitelistFilter.java`
+
