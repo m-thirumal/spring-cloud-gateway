@@ -5,7 +5,6 @@ package in.thirumal.eureka.client;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
@@ -20,18 +19,25 @@ import com.netflix.discovery.shared.Applications;
 @Service
 public class EurekaClientService {
 
-	@Autowired
-	private DiscoveryClient discoveryClient;
-	@Autowired
-	private EurekaClient eurekaClient;	
+	private final DiscoveryClient discoveryClient;
+	private final EurekaClient eurekaClient;	
 	
+	/**
+	 * @param discoveryClient
+	 * @param eurekaClient
+	 */
+	public EurekaClientService(DiscoveryClient discoveryClient, EurekaClient eurekaClient) {
+		super();
+		this.discoveryClient = discoveryClient;
+		this.eurekaClient = eurekaClient;
+	}
+
 	public Applications getAllInstances(String applicationName) {
 		List<String> apps = discoveryClient.getServices();  
         for (String app : apps ) {
         	System.out.print("App: " + app);
         	List<ServiceInstance> instances = discoveryClient.getInstances(app); //Need to pass service id not the name
-        	System.out.print(" Instance :" + instances);
-            for (ServiceInstance instance : instances) {
+        	for (ServiceInstance instance : instances) {
             	String url = "http://"+ instance.getHost() + ":"+ instance.getPort();
             	System.out.println(url);
             }
